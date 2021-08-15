@@ -1,6 +1,7 @@
 from numpy import zeros
 import copy
 import sys
+import random
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = None
@@ -237,3 +238,44 @@ def process_data(filename):
       print("Unexpected error:", sys.exc_info()[0])
 
 
+def generate_random_population():
+   global NUMBER_NODES
+   global POPULATION
+   global graph
+   print("\nGenerating population...")
+
+   population = []
+   flags = [False] * NUMBER_NODES
+
+   for i in range(0,POPULATION-1):
+      rand = random.randint(0, NUMBER_NODES - 1)
+      cntt = 0
+      while (flags[rand]):
+         cntt += 1
+         if cntt> NUMBER_NODES:
+            break
+         rand = random.randint(0, NUMBER_NODES - 1)
+      flags[rand] = True
+
+      clique = Clique(rand)
+      sortedList = clique.compute_sorted_list()
+      cnt = 0
+      while len(clique.pa) > 0:
+         node = sortedList[cnt].node
+         cnt += 1
+         if clique.contains_in_pa(node):
+            clique.add_vertex(node)
+      population.append(clique)
+
+   node = graph.sortedNodes[0]
+   clique = Clique(node)
+   sortedList = clique.compute_sorted_list()
+   count = 0
+   while len(clique.pa) > 0:
+      node = sortedList[0].node
+      count += 1
+      if clique.contains_in_pa(node):
+         clique.add_vertex(node)
+   population.append(clique)
+
+   return population

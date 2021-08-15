@@ -1,5 +1,6 @@
 from numpy import zeros
 import copy
+import sys
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = None
@@ -204,3 +205,35 @@ class Clique:
       clone.mapPA = cMapPA
       clone.mapClique = cMapClique
       return clone
+
+# def generate_random_number  nepotrebno
+# def generate_double_random_number  nepotrebno
+
+def process_data(filename):
+   global NUMBER_NODES
+   global NUMBER_EDGES
+   global graph
+   try:
+      with open(filename, 'r') as f:
+         line = f.readline()
+         while line[0] == 'c' or len(line) <= 1:
+            line = f.readline()
+         if line[0] == 'p':
+            tok = line.split(' ')
+            NUMBER_NODES = int(tok[2])
+            NUMBER_EDGES = int(tok[3])
+
+         graph = Graph()
+         for i in range(0, NUMBER_EDGES):
+            line = f.readline()
+            tok = line.split(' ')
+            sv = int(tok[1]) -1
+            ev = int(tok[2]) -1
+            graph.add_edge(sv,ev)
+
+   except IOError as e:
+      print("No file found")
+   except:
+      print("Unexpected error:", sys.exc_info()[0])
+
+

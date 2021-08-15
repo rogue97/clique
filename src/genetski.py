@@ -1,4 +1,5 @@
 from numpy import zeros
+import copy
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = None
@@ -84,7 +85,7 @@ class Clique:
       self.mapClique = {} # int bool less<int> videti za sta sluzi less<int>
       
       # cuvanje mesta za niz od NUMBER_NODES elemenata za clique i pa
-      # TODO: dorada
+      # TODO: dorada  ?[None] * NUMBER_NODES?
       self.clique.append(firstVertex)
 
       for i in range(0, NUMBER_NODES):
@@ -191,5 +192,15 @@ class Clique:
          # TODO dorada
       return sortedList
 
+   def clone(self):
+      cpa = copy.deepcopy(self.pa)
+      cclique = copy.deepcopy(self.clique)
+      cMapPA = copy.deepcopy(self.mapPA)
+      cMapClique = copy.deepcopy(self.mapClique)
 
-      
+      clone = Clique()
+      clone.pa = cpa
+      clone.clique = cclique
+      clone.mapPA = cMapPA
+      clone.mapClique = cMapClique
+      return clone

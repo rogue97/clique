@@ -279,3 +279,53 @@ def generate_random_population():
    population.append(clique)
 
    return population
+
+def greedy_crossover(c1: Clique, c2: Clique):
+   global graph
+   global NUMBER_NODES
+   flags = [False] * NUMBER_NODES
+   vec = []
+
+   for i in range(0, len(c1.clique)):
+      vertex = c1.clique[i]
+      if not flags[vertex]:
+         vec.append(vertex)
+         flags[vertex] = True
+
+   for i in range(0, len(c2.clique)):
+      vertex = c2.clique[i]
+      if not flags[vertex]:
+         vec.append(vertex)
+         flags[vertex] = True
+
+   sortedList = []
+
+   for i in range(0, len(vec)):
+      node1 = vec[i]
+      reach = 0
+      for j in range (0, len(vec)):
+         if i == j:
+            continue
+         node2 = vec[j]
+         if(graph.aMatrix[node1][node2] == 1):
+            reach += 1
+
+      sNode = SortedListNode(node1, reach)
+      sortedList.append(sNode)
+
+   sortedList.sort(key= lambda x: x.reach, reverse=True)
+   firstVertex = sortedList[0].node
+   clique = Clique(firstVertex)
+   count = 1
+
+   while count < len(sortedList):
+      node = sortedList[count].node
+      if clique.contains_in_pa(node):
+         clique.add_vertex(node)
+      count += 1
+
+   while len(clique.pa) > 0:
+      node = clique.pa[0]
+      clique.add_vertex(node)
+
+   return clique

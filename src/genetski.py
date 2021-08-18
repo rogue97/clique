@@ -355,3 +355,17 @@ def intersection_crossover(c1: Clique, c2: Clique):
             clique.add_vertex(node)
 
    return clique
+
+def random_selection(population):
+   parents = []
+   rand1 = random.randint(0, POPULATION - 1)
+   rand2 = random.randint(0, POPULATION - 1)
+   while rand1 == rand2:
+      rand1 = random.randint(0, POPULATION - 1)
+      rand2 = random.randint(0, POPULATION - 1)
+
+   p1 = copy.deepcopy(population[rand1])
+   p2 = copy.deepcopy(population[rand2])
+   parents.append(p1)
+   parents.append(p2)
+   return parents

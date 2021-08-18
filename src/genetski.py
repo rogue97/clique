@@ -211,9 +211,6 @@ class Clique:
 # def generate_double_random_number  nepotrebno
 
 def process_data(filename):
-   global NUMBER_NODES
-   global NUMBER_EDGES
-   global graph
    try:
       with open(filename, 'r') as f:
          line = f.readline()
@@ -239,9 +236,6 @@ def process_data(filename):
 
 
 def generate_random_population():
-   global NUMBER_NODES
-   global POPULATION
-   global graph
    print("\nGenerating population...")
 
    population = []
@@ -281,8 +275,6 @@ def generate_random_population():
    return population
 
 def greedy_crossover(c1: Clique, c2: Clique):
-   global graph
-   global NUMBER_NODES
    flags = [False] * NUMBER_NODES
    vec = []
 
@@ -327,5 +319,39 @@ def greedy_crossover(c1: Clique, c2: Clique):
    while len(clique.pa) > 0:
       node = clique.pa[0]
       clique.add_vertex(node)
+
+   return clique
+
+def intersection_crossover(c1: Clique, c2: Clique):
+   intersect = []
+   flags = [False] * NUMBER_NODES
+
+   for i in range(0, len(c2.clique)):
+      vertex = c2.clique[i]
+      flags[vertex] = True
+
+   for i in range(0, len(c1.clique)):
+      ver1 = c1.clique[i]
+      if flags[ver1]:
+         intersect.append(ver1)
+
+   if len(intersect) == 0:
+      return greedy_crossover(c1, c2)
+
+   vertex = intersect[0]
+   clique = Clique(vertex)
+   for i in range(1,len(intersect)):
+      vertex = intersect[i]
+      if(clique.contains_in_pa(vertex)):
+         clique.add_vertex(vertex)
+
+   if len(clique.pa) > 0:
+      sortedList = clique.compute_sorted_list()
+      cnt = 0
+      while len(clique.pa) > 0:
+         node = sortedList[cnt].node
+         cnt += 1
+         if clique.contains_in_pa(node):
+            clique.add_vertex(node)
 
    return clique

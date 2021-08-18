@@ -369,3 +369,39 @@ def random_selection(population):
    parents.append(p1)
    parents.append(p2)
    return parents
+
+def local_improvement(clique: Clique):
+   gBest = clique.clone()
+   for i in range(0, LOCAL_IMPROVEMENT):
+      rand1 = random.randint(0, POPULATION - 1)
+      rand2 = random.randint(0, POPULATION - 1)
+      count = 0
+
+      while rand1==rand2:
+         count += 1
+         if count > UNIQUE_ITERATIONS:
+            break
+         rand1 = random.randint(0, POPULATION - 1)
+         rand2 = random.randint(0, POPULATION - 1)
+
+      vertex1 = clique.clique[rand1]
+      vertex2 = clique.clique[rand2]
+      clique.remove_vertex(vertex1)
+      clique.remove_vertex(vertex2)
+      sortedList = clique.compute_sorted_list()
+      count = 0
+
+      while len(clique.pa) > 0:
+         node = sortedList[count].node
+         count += 1
+         if node >= NUMBER_NODES:
+            print("***Node greater: ", node, "***")
+            exit(0)
+
+         if clique.contains_in_pa(node):
+            clique.add_vertex(node)
+
+      if len(gBest.clique) < len(clique.clique):
+         gBest = clique.clone()
+
+   clique = gBest

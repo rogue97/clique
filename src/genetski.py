@@ -29,10 +29,6 @@ class SortedListNode:
       self.node = -1 if node is None else node
       self.reach = 0 if reach is None else reach
 
-# DescendingNode -> sortiranje nodova po degree
-
-# DescendingSortedListNode -> sortiranje nodova po reach
-
 class Graph:
    def __init__(self):
       # lista Node-ova
@@ -206,9 +202,6 @@ class Clique:
       clone.mapPA = cMapPA
       clone.mapClique = cMapClique
       return clone
-
-# def generate_random_number  nepotrebno
-# def generate_double_random_number  nepotrebno
 
 def process_data(filename):
    try:
@@ -405,3 +398,39 @@ def local_improvement(clique: Clique):
          gBest = clique.clone()
 
    clique = gBest
+
+
+def mutate(clique: Clique):
+   flags = [False] * NUMBER_NODES
+
+   for i in range(0, MUTATIONS):
+      rand = random.randint(0, len(clique.clique) - 1)
+      count = 0
+      while flags[rand]:
+         rand = random.randint(0, len(clique.clique) - 1)
+         count += 1
+         if count > UNIQUE_ITERATIONS:
+            break
+
+      flags[rand] = True
+      vertex = clique.clique[rand]
+      clique.remove_vertex(vertex)
+
+   rand = random.random()
+   if rand < 0.5:
+      sortedList = clique.compute_sorted_list()
+      cnt = 0
+      while len(clique.pa) > 0:
+         node = sortedList[cnt].node
+         cnt += 1
+         if clique.contains_in_pa(node):
+            clique.add_vertex(node)
+   else:
+      while len(clique.pa) > 0:
+         rand = random.randint(0, len(clique.pa) - 1)
+         vertex = clique.pa[rand]
+         clique.add_vertex(vertex)
+
+
+
+# main .....

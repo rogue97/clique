@@ -5,9 +5,9 @@ import random
 from datetime import datetime
 
 # ucitava se iz fajla u processData
-NUMBER_NODES = None
-NUMBER_EDGES = None
-    
+NUMBER_NODES = 0
+NUMBER_EDGES = 0
+
 POPULATION = 10             # size of the population
 LOCAL_IMPROVEMENT = 10      # number of local improvements
 GENERATIONS = 10000         # number of generations to run the algorithm
@@ -68,32 +68,30 @@ class Graph:
          (Node)(self.nodes[ev]).degree += 1
    
    def sortList(self):
-      # za sortiranje objekata ove klase?
-      pass
+      self.sortedNodes.sort(key= lambda  x: x.degree, reverse=True)
 
 # A global instance of the Graph class used througout the code
 graph :Graph = None
 
 class Clique:
    def __init__(self, firstVertex = None):
-      global graph
-
       self.clique = [] # int
       self.pa = [] #int
       self.mapPA = {} # int bool less<int> videti za sta sluzi less<int>
       self.mapClique = {} # int bool less<int> videti za sta sluzi less<int>
-      
+
       # cuvanje mesta za niz od NUMBER_NODES elemenata za clique i pa
       # TODO: dorada  ?[None] * NUMBER_NODES?
-      self.clique.append(firstVertex)
 
-      for i in range(0, NUMBER_NODES):
-         if i == firstVertex:
-            continue
-         else:
-            if graph.aMatrix[i][firstVertex] == 1:
-               self.pa.append(i)
-
+      if firstVertex != None:
+         self.clique.append(firstVertex)
+         for i in range(0, NUMBER_NODES):
+            if i == firstVertex:
+               continue
+            else:
+               if graph.aMatrix[i][firstVertex] == 1:
+                  self.pa.append(i)
+                  self.mapPA[i] = True
 
    def add_vertex(self, vertex:int):
       global graph
@@ -149,10 +147,10 @@ class Clique:
 
    
    def contains_in_pa(self, vertex) -> bool:
-      if vertex not in self.mapPA.keys():
-         return
+      if vertex in self.mapPA.keys():
+         return True
       
-      return self.mapPA[vertex] # znaci ono jeste mapa int, bool ostaje samo da se vidi sta je less!
+      return False # znaci ono jeste mapa int, bool ostaje samo da se vidi sta je less!
          
    #TODO ovo i slicno moze sve da se skrati cini mi se? postoji jednostavniji zapis u py
    def erase_from_clique(self, vertex):
@@ -170,12 +168,10 @@ class Clique:
 
    def contains_in_clique(self, vertex) -> bool:
       if vertex in self.mapClique.keys():
-         return False
-      return self.mapClique[vertex]
+         return True
+      return False
       
    def compute_sorted_list(self) -> list: #vector<SortedListNode>
-      global graph
-
       sortedList = []
       for i in range(0, len(self.pa)):
          node1 = self.pa[i]
@@ -205,6 +201,9 @@ class Clique:
       return clone
 
 def process_data(filename):
+   global graph
+   global NUMBER_NODES
+   global NUMBER_EDGES
    try:
       with open(filename, 'r') as f:
          line = f.readline()
@@ -255,17 +254,16 @@ def generate_random_population():
             clique.add_vertex(node)
       population.append(clique)
 
-   node = graph.sortedNodes[0]
+   node = graph.sortedNodes[0].value
    clique = Clique(node)
    sortedList = clique.compute_sorted_list()
    count = 0
    while len(clique.pa) > 0:
-      node = sortedList[0].node
+      node = sortedList[count].node
       count += 1
       if clique.contains_in_pa(node):
          clique.add_vertex(node)
    population.append(clique)
-
    return population
 
 def greedy_crossover(c1: Clique, c2: Clique):
@@ -367,16 +365,16 @@ def random_selection(population):
 def local_improvement(clique: Clique):
    gBest = clique.clone()
    for i in range(0, LOCAL_IMPROVEMENT):
-      rand1 = random.randint(0, POPULATION - 1)
-      rand2 = random.randint(0, POPULATION - 1)
+      rand1 = random.randint(0, len(clique.clique) - 1)
+      rand2 = random.randint(0, len(clique.clique) - 1)
       count = 0
 
       while rand1==rand2:
          count += 1
          if count > UNIQUE_ITERATIONS:
             break
-         rand1 = random.randint(0, POPULATION - 1)
-         rand2 = random.randint(0, POPULATION - 1)
+         rand1 = random.randint(0, len(clique.clique) - 1)
+         rand2 = random.randint(0, len(clique.clique) - 1)
 
       vertex1 = clique.clique[rand1]
       vertex2 = clique.clique[rand2]
@@ -435,7 +433,7 @@ def mutate(clique: Clique):
 
 
 if __name__ == '__main__':
-   random.seed(datetime.now())
+   random.seed(datetime.now().microsecond)
    if len(sys.argv) < 3:
       print("\nSet filename and iterations as argument\n\n")
       exit(0)
@@ -455,7 +453,7 @@ if __name__ == '__main__':
          cnt += 1
          if cnt > SHUFFLE_TOLERANCE:
             population = generate_random_population()
-            random.seed(datetime.now())
+            random.seed(datetime.now().microsecond)
             cnt = 0
       else:
          prevBest = len(gBest.clique)
@@ -470,7 +468,6 @@ if __name__ == '__main__':
 
       local_improvement(gBest)
       newPopulation.append(gBest)
-      print(len(gBest.clique))
 
       for i in range(0, POPULATION - 1):
          parents = random_selection(population)

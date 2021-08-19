@@ -1,8 +1,19 @@
+import os
+from matplotlib import pyplot as plt
 from numpy import zeros
 import copy
 import sys
 import random
+import networkx as nx
 from datetime import datetime
+
+graph_pics_dir = "images_mut_3"
+
+graph_1 = "[c125-9] 125 6963.txt"
+graph_2 = "[brock200_4] 200 13089.txt"
+graph_3 = "[gen400_p0-9_55] 400 71820.txt"
+graph_4 = "[p_hat300-3] 300 33390.txt"
+graph_5 = "[DSJC1000-5] 1000 499652.txt"
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = 0
@@ -10,11 +21,10 @@ NUMBER_EDGES = 0
 
 POPULATION = 10             # size of the population
 LOCAL_IMPROVEMENT = 10      # number of local improvements
-GENERATIONS = 10000         # number of generations to run the algorithm
-MUTATIONS = 1 	            # How many vertices to remove randomly in the mutate() function
-UNIQUE_ITERATIONS = 100	    # Used by localImprovement() to prevent a stall for very small cliques
+MUTATIONS = 5 	            # How many vertices to remove randomly in the mutate() function
+UNIQUE_ITERATIONS = 100	    # Used by local_improvement() to prevent a stall for very small cliques
 SHUFFLE_TOLERANCE = 10      # Generate a fresh population after a stall
-
+DEFAULT_TOTAL_ITERATIONS = 500 # number of generations to run the algorithm
 
 class Node:
    def __init__(self, value = 0):
@@ -38,8 +48,6 @@ class Graph:
          self.nodes[i] = None
       self.aMatrix = zeros((NUMBER_NODES, NUMBER_NODES))
       self.sortedNodes = []
-
-    # detruktor za nodes i aMatrix...
     
    def add_edge(self, sv, ev):
       self.aMatrix[sv][ev] = 1
@@ -69,6 +77,33 @@ class Graph:
    
    def sortList(self):
       self.sortedNodes.sort(key= lambda  x: x.degree, reverse=True)
+   
+   def visualize(self, clique: list, filepath:str=None, filename:str =None):
+      global NUMBER_NODES
+      # Node names start at 1
+      print ("\rFound clique with "+str(len(clique)) + " nodes :\n"+str(clique)+"\n")
+      G = nx.Graph()
+      visual = []
+      for i in range(0, NUMBER_NODES):
+         for j in range(i+1, NUMBER_NODES):
+            if self.aMatrix[i][j] == 1:
+               visual.append([i+1,j+1])
+               G.add_edge(i+1,j+1)
+
+      clique_edges = []
+      for i in range(0, len(clique)):
+         for j in range(i+1, len(clique)):
+            clique_edges.append([clique[i]+1, clique[j]+1])
+
+      pos = nx.circular_layout(G)  # positions for all nodes
+      nx.draw_networkx_nodes(G, pos, nodelist=[i for i in range(1, NUMBER_NODES+1)], node_size=[1 for _ in range(1, NUMBER_NODES+1)])
+      nx.draw_networkx_edges(G, pos, edgelist=visual)
+      nx.draw_networkx_edges(G, pos, edgelist=clique_edges, edge_color="tab:blue", label="Clique")
+      if filepath is not None:
+         plt.title(filename + "\nnodes in the clique "+str(len(clique)))
+         plt.savefig(filepath)
+         # plt.show()
+      plt.clf()
 
 # A global instance of the Graph class used througout the code
 graph :Graph = None
@@ -77,11 +112,8 @@ class Clique:
    def __init__(self, firstVertex = None):
       self.clique = [] # int
       self.pa = [] #int
-      self.mapPA = {} # int bool less<int> videti za sta sluzi less<int>
-      self.mapClique = {} # int bool less<int> videti za sta sluzi less<int>
-
-      # cuvanje mesta za niz od NUMBER_NODES elemenata za clique i pa
-      # TODO: dorada  ?[None] * NUMBER_NODES?
+      self.mapPA = {} #int
+      self.mapClique = {} # int 
 
       if firstVertex != None:
          self.clique.append(firstVertex)
@@ -136,7 +168,7 @@ class Clique:
       del self.mapPA[vertex]
       flag = False
       toRemove = None
-      for ver in self.pa: # da li je ovde bitno koji je iterator, i da li je on sortiran???
+      for ver in self.pa:
          if ver == vertex:
             flag = True
             toRemove = ver
@@ -150,9 +182,8 @@ class Clique:
       if vertex in self.mapPA.keys():
          return True
       
-      return False # znaci ono jeste mapa int, bool ostaje samo da se vidi sta je less!
+      return False 
          
-   #TODO ovo i slicno moze sve da se skrati cini mi se? postoji jednostavniji zapis u py
    def erase_from_clique(self, vertex):
       del self.mapClique[vertex]
       flag = False
@@ -178,13 +209,12 @@ class Clique:
          reach = 0
          for j in range(0, len(self.pa)):
             if i == j:
-               continue # refaktorisati ovo da bude efikasnije
+               continue 
             node2 = self.pa[j]
             if graph.aMatrix[node1][node2] == 1:
                reach += 1
          n = SortedListNode(node1, reach)
          sortedList.append(n)
-         # TODO dorada
       return sortedList
 
    def clone(self):
@@ -215,7 +245,7 @@ def process_data(filename):
             NUMBER_EDGES = int(tok[3])
 
          graph = Graph()
-         for i in range(0, NUMBER_EDGES):
+         for _ in range(0, NUMBER_EDGES):
             line = f.readline()
             tok = line.split(' ')
             sv = int(tok[1]) -1
@@ -225,11 +255,34 @@ def process_data(filename):
    except IOError as e:
       print("No file found")
    except:
-      print("Unexpected error:", sys.exc_info()[0])
+      print("Unexpected error:", sys.exc_info())
 
+# Print iterations progress from https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
-def generate_random_population():
-   print("\nGenerating population...")
+def generate_random_population(total=None, i=None):
+   
+   if i is not None:
+      printProgressBar(i, total, prefix="Genetic alg")
 
    population = []
    flags = [False] * NUMBER_NODES
@@ -402,7 +455,7 @@ def local_improvement(clique: Clique):
 def mutate(clique: Clique):
    flags = [False] * NUMBER_NODES
 
-   for i in range(0, MUTATIONS):
+   for _ in range(0, MUTATIONS):
       rand = random.randint(0, len(clique.clique) - 1)
       count = 0
       while flags[rand]:
@@ -430,29 +483,24 @@ def mutate(clique: Clique):
          vertex = clique.pa[rand]
          clique.add_vertex(vertex)
 
+def genetski(filepath: str, iterations) -> Clique:
 
-
-if __name__ == '__main__':
-   random.seed(datetime.now().microsecond)
-   if len(sys.argv) < 3:
-      print("\nSet filename and iterations as argument\n\n")
-      exit(0)
-
-   process_data(sys.argv[1])
-   GENERATIONS = int(sys.argv[2])
+   process_data(filepath)
+   iters = int(iterations)
 
    graph.sortList()
+   print("\nGenerating initial population...")
    population = generate_random_population()
    population.sort(key= lambda x: len(x.clique), reverse=True)
 
-   gBest = population[0].clone()
+   gBest :Clique = population[0].clone()
    prevBest = len(gBest.clique)
    cnt = 0
-   for i in range(0, GENERATIONS):
+   for i in range(0, iters):
       if prevBest == len(gBest.clique):
          cnt += 1
          if cnt > SHUFFLE_TOLERANCE:
-            population = generate_random_population()
+            population = generate_random_population(iters, i)
             random.seed(datetime.now().microsecond)
             cnt = 0
       else:
@@ -478,10 +526,48 @@ if __name__ == '__main__':
 
          newPopulation.append(offspring)
 
-      # population = copy.deepcopy(newPopulation)
       population = newPopulation
+   filename = filepath.split(os.sep)[-1][:-4]+"_total_iters_"+str(iterations)+".png"
+   pic_filepath = os.path.join(os.getcwd(), graph_pics_dir, filename)
+   graph.visualize(gBest.clique, pic_filepath, filename)
 
-   print("\nVertices in the Clique:\n")
-   for i in range(0, len(gBest.clique)):
-      print(gBest.clique[i] + 1," ")
-   print("\n\n")
+   return gBest
+
+def gen_for_all_files(file_no):
+   global DEFAULT_TOTAL_ITERATIONS
+   files = [graph_1, graph_2, graph_3, graph_4, graph_5]
+   if file_no is None:
+      for filename in files:
+         current_file = os.path.join(os.getcwd(), filename)
+         print("--------------------------","Started working on: "+ current_file, sep='\n')
+         genetski(current_file, DEFAULT_TOTAL_ITERATIONS) 
+
+   else:
+      if file_no > len(files):
+         print("There are only", len(files), files)
+         exit(0)
+
+      current_file = os.path.join(os.getcwd(), files[file_no])
+      print("--------------------------","Started working on: "+ current_file, sep='\n')
+      genetski(current_file, DEFAULT_TOTAL_ITERATIONS) 
+
+
+if __name__ == '__main__':
+
+   random.seed(datetime.now().microsecond)
+   total_args = len(sys.argv)
+   if total_args <= 2:
+      gen_for_all_files(None if total_args != 2 else int(sys.argv[1]))
+   else:
+      if total_args < 3:
+         print("\nSet filename and iterations as argument\n\n")
+         exit(0)
+
+      iterations = int(sys.argv[2])
+      
+      gBest = genetski(sys.argv[1], iterations)
+
+      print("\nVertices in the Clique:\n")
+      for i in range(0, len(gBest.clique)):
+         print(gBest.clique[i] + 1," ")
+      print("\n\n")

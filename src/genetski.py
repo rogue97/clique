@@ -2,6 +2,7 @@ from numpy import zeros
 import copy
 import sys
 import random
+from datetime import datetime
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = None
@@ -433,4 +434,57 @@ def mutate(clique: Clique):
 
 
 
-# main .....
+if __name__ == '__main__':
+   random.seed(datetime.now())
+   if len(sys.argv) < 3:
+      print("\nSet filename and iterations as argument\n\n")
+      exit(0)
+
+   process_data(sys.argv[1])
+   GENERATIONS = int(sys.argv[2])
+
+   graph.sortList()
+   population = generate_random_population()
+   population.sort(key= lambda x: len(x.clique), reverse=True)
+
+   gBest = population[0].clone()
+   prevBest = len(gBest.clique)
+   cnt = 0
+   for i in range(0, GENERATIONS):
+      if prevBest == len(gBest.clique):
+         cnt += 1
+         if cnt > SHUFFLE_TOLERANCE:
+            population = generate_random_population()
+            random.seed(datetime.now())
+            cnt = 0
+      else:
+         prevBest = len(gBest.clique)
+         cnt = 0
+
+      newPopulation = []
+      population.sort(key= lambda x: len(x.clique), reverse=True)
+
+      localBest = population[0]
+      if len(gBest.clique) < len(localBest.clique):
+         gBest = localBest.clone()
+
+      local_improvement(gBest)
+      newPopulation.append(gBest)
+      print(len(gBest.clique))
+
+      for i in range(0, POPULATION - 1):
+         parents = random_selection(population)
+         offspring = intersection_crossover(parents[0], parents[1])
+         local_improvement(offspring)
+         if len(offspring.clique) <= len(parents[0].clique) or len(offspring.clique) <= len(parents[1].clique):
+            mutate(offspring)
+
+         newPopulation.append(offspring)
+
+      # population = copy.deepcopy(newPopulation)
+      population = newPopulation
+
+   print("\nVertices in the Clique:\n")
+   for i in range(0, len(gBest.clique)):
+      print(gBest.clique[i] + 1," ")
+   print("\n\n")

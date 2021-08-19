@@ -481,6 +481,7 @@ if __name__ == '__main__':
       # population = copy.deepcopy(newPopulation)
       population = newPopulation
 
+   print("\nBest found: ", len(gBest.clique))
    print("\nVertices in the Clique:\n")
    for i in range(0, len(gBest.clique)):
       print(gBest.clique[i] + 1," ")

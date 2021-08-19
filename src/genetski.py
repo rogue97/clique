@@ -258,7 +258,7 @@ def process_data(filename):
       print("Unexpected error:", sys.exc_info())
 
 # Print iterations progress from https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = 'â–ˆ', printEnd = "\r"):
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '¦', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:

@@ -7,13 +7,13 @@ import random
 import networkx as nx
 from datetime import datetime
 
-graph_pics_dir = "images_mut_3"
+graph_pics_dir = "images_mut_1"
 
-graph_1 = "[c125-9] 125 6963.txt"
-graph_2 = "[brock200_4] 200 13089.txt"
-graph_3 = "[gen400_p0-9_55] 400 71820.txt"
-graph_4 = "[p_hat300-3] 300 33390.txt"
-graph_5 = "[DSJC1000-5] 1000 499652.txt"
+graph_1 = "graphs"+os.sep+"[c125-9] 125 6963.txt"
+graph_2 = "graphs"+os.sep+"[brock200_4] 200 13089.txt"
+graph_3 = "graphs"+os.sep+"[gen400_p0-9_55] 400 71820.txt"
+graph_4 = "graphs"+os.sep+"[p_hat300-3] 300 33390.txt"
+graph_5 = "graphs"+os.sep+"[DSJC1000-5] 1000 499652.txt"
 
 # ucitava se iz fajla u processData
 NUMBER_NODES = 0
@@ -21,10 +21,10 @@ NUMBER_EDGES = 0
 
 POPULATION = 10             # size of the population
 LOCAL_IMPROVEMENT = 10      # number of local improvements
-MUTATIONS = 5 	            # How many vertices to remove randomly in the mutate() function
+MUTATIONS = 1 	            # How many vertices to remove randomly in the mutate() function
 UNIQUE_ITERATIONS = 100	    # Used by local_improvement() to prevent a stall for very small cliques
 SHUFFLE_TOLERANCE = 10      # Generate a fresh population after a stall
-DEFAULT_TOTAL_ITERATIONS = 500 # number of generations to run the algorithm
+DEFAULT_TOTAL_ITERATIONS = 600 # number of generations to run the algorithm
 
 class Node:
    def __init__(self, value = 0):
@@ -99,10 +99,13 @@ class Graph:
       nx.draw_networkx_nodes(G, pos, nodelist=[i for i in range(1, NUMBER_NODES+1)], node_size=[1 for _ in range(1, NUMBER_NODES+1)])
       nx.draw_networkx_edges(G, pos, edgelist=visual)
       nx.draw_networkx_edges(G, pos, edgelist=clique_edges, edge_color="tab:blue", label="Clique")
-      if filepath is not None:
-         plt.title(filename + "\nnodes in the clique "+str(len(clique)))
-         plt.savefig(filepath)
-         # plt.show()
+      try:
+         if filepath is not None:
+            plt.title(filename + "\nnodes in the clique "+str(len(clique)))
+            plt.savefig(filepath)
+            # plt.show()
+      except:
+         pass
       plt.clf()
 
 # A global instance of the Graph class used througout the code
@@ -245,20 +248,26 @@ def process_data(filename):
             NUMBER_EDGES = int(tok[3])
 
          graph = Graph()
+         tmp = 0
          for _ in range(0, NUMBER_EDGES):
             line = f.readline()
-            tok = line.split(' ')
-            sv = int(tok[1]) -1
-            ev = int(tok[2]) -1
-            graph.add_edge(sv,ev)
+            try:
+               tok = line.split(' ')
+               sv = int(tok[1]) -1
+               ev = int(tok[2]) -1
+               graph.add_edge(sv,ev)
+            except:
+               tmp+=1
+         if tmp != 0:
+            print(str(tmp),"Unexpected error reading edges:", sys.exc_info())
 
-   except IOError as e:
+   except IOError as _:
       print("No file found")
    except:
       print("Unexpected error:", sys.exc_info())
 
 # Print iterations progress from https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '¦', printEnd = "\r"):
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '*', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:

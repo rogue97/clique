@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 
@@ -37,6 +38,10 @@ def process_data(filename) -> dict:
                     g[sv] = [ev]
                 else:
                     g[sv] = g[sv] + [ev]
+                if ev not in keys:
+                    g[ev] = [sv]
+                else:
+                    g[ev] = g[ev] + [sv]
         return g
     except IOError as _:
         print("No file found")
@@ -63,9 +68,10 @@ def brute_force_clique(G:dict):
 
 
 if __name__ == '__main__':
-
+    print("Loading graph from :", graph_1)
     G = process_data(graph_1)
+    print("Brute force algorithm...", datetime.now())
     brute_force_clique(G)
     
-    print("Maximum clique",str(max), "with nodes:\n", clique_nodes)
+    print(datetime.now(),"Maximum clique",str(max), "with nodes:\n", clique_nodes)
                         

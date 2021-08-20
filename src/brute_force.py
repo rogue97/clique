@@ -6,11 +6,12 @@ import sys
 max = 0
 clique_nodes = []
 
-graph_1 = "[c125-9] 125 6963.txt"
-graph_2 = "[brock200_4] 200 13089.txt"
-graph_3 = "[gen400_p0-9_55] 400 71820.txt"
-graph_4 = "[p_hat300-3] 300 33390.txt"
-graph_5 = "[DSJC1000-5] 1000 499652.txt"
+test = "test.txt"
+graph_1 = "graphs/[c125-9] 125 6963.txt"
+graph_2 = "graphs/[brock200_4] 200 13089.txt"
+graph_3 = "graphs/[gen400_p0-9_55] 400 71820.txt"
+graph_4 = "graphs/[p_hat300-3] 300 33390.txt"
+graph_5 = "graphs/[DSJC1000-5] 1000 499652.txt"
 
 def intersection(a: list, b: list):
     return [value for value in a if value in b]
@@ -45,6 +46,7 @@ def process_data(filename) -> dict:
         return g
     except IOError as _:
         print("No file found")
+        exit(0)
     except:
         print("Unexpected error:", sys.exc_info())
 
@@ -68,21 +70,12 @@ def brute_force_clique(G:dict):
 
 
 if __name__ == '__main__':
-    print("Loading graph from :", graph_1)
-    # G = process_data(graph_1)
+    graph = test
+    print("Loading graph from :", graph)
+    G = process_data(graph)
     print("Brute force algorithm...", datetime.now())
-    # brute_force_clique(G)
-    # D = {
-    #     'a' : ['b', 'c', 'd'],
-    #     'b' : ['c', 'e', 'd', 'a'],
-    #     'c' : ['a', 'b', 'd'],
-    #     'g' : ['d','i'],
-    #     'i' : ['j', 'g', 'd'],
-    #     'd' : ['c', 'e','f', 'b','g','i'],
-    #     'j' : ['i']
-    # }
-    D = {0: [1, 2, 3, 4, 5, 7, 9], 9: [0, 2, 3, 4, 5, 6, 7, 9], 1: [0, 1, 2, 3, 5, 6, 7, 8], 7: [0, 1, 2, 3, 5, 6, 7, 9], 8: [1, 3, 4, 5, 6], 3: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2: [0, 1, 3, 5, 7, 9], 5: [0, 1, 2, 3, 5, 6, 7, 8, 9], 4: [0, 8, 3, 9], 6: [1, 3, 5, 6, 7, 8, 9]}
-    brute_force_clique(D)
+    print(list(G.keys()))
+    brute_force_clique(G)
     
     print(datetime.now(),"Maximum clique",str(max), "with nodes:\n", clique_nodes)
                         

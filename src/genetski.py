@@ -7,6 +7,7 @@ import sys
 import random
 import networkx as nx
 from datetime import datetime
+import time
 
 graph_pics_dir = "images_mut_1"
 
@@ -84,10 +85,10 @@ class Graph:
    def sortList(self):
       self.sortedNodes.sort(key= lambda  x: x.degree, reverse=True)
    
-   def visualize(self, clique: list, filepath:str=None, filename:str =None):
+   def visualize(self, clique: list, time, filepath:str=None, filename:str =None):
       global NUMBER_NODES
       # Node names start at 1
-      print ("\rFound clique with "+str(len(clique)) + " nodes :\n"+str(clique)+"\n")
+      print ("\rFound clique with "+str(len(clique)) + " nodes in " + '{0:.2f}'.format(time) +" sec:\n"+str(clique)+"\n")
       G = nx.Graph()
       visual = []
       for i in range(0, NUMBER_NODES):
@@ -498,6 +499,8 @@ def mutate(clique: Clique):
 
 def genetski(filepath: str, iterations) -> Clique:
 
+   start = time.time()
+
    process_data(filepath)
    iters = int(iterations)
 
@@ -543,7 +546,9 @@ def genetski(filepath: str, iterations) -> Clique:
 
    filename = filepath.split(os.sep)[-1][:-4]+"_total_iters_"+str(iterations)+".png"
    pic_filepath = os.path.join(os.getcwd(), graph_pics_dir, filename)
-   graph.visualize(gBest.clique, pic_filepath, filename)
+
+   end = time.time()
+   graph.visualize(gBest.clique, end - start, pic_filepath, filename)
 
    return gBest
 
@@ -578,10 +583,6 @@ if __name__ == '__main__':
          exit(0)
 
       iterations = int(sys.argv[2])
-      
+
       gBest = genetski(sys.argv[1], iterations)
 
-      print("\nVertices in the Clique:\n")
-      for i in range(0, len(gBest.clique)):
-         print(gBest.clique[i] + 1," ")
-      print("\n\n")

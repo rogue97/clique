@@ -1,4 +1,5 @@
 import os
+from typing import List
 from matplotlib import pyplot as plt
 from numpy import zeros
 import copy
@@ -9,13 +10,19 @@ from datetime import datetime
 
 graph_pics_dir = "images_mut_1"
 
+# Predefined files for testing
+# index 0
 graph_1 = "graphs"+os.sep+"[c125-9] 125 6963.txt"
+# index 1
 graph_2 = "graphs"+os.sep+"[brock200_4] 200 13089.txt"
+# index 2
 graph_3 = "graphs"+os.sep+"[gen400_p0-9_55] 400 71820.txt"
+# index 3
 graph_4 = "graphs"+os.sep+"[p_hat300-3] 300 33390.txt"
+# index 4
 graph_5 = "graphs"+os.sep+"[DSJC1000-5] 1000 499652.txt"
 
-# ucitava se iz fajla u processData
+# to be loaded in process_data from selected file
 NUMBER_NODES = 0
 NUMBER_EDGES = 0
 
@@ -24,7 +31,7 @@ LOCAL_IMPROVEMENT = 10      # number of local improvements
 MUTATIONS = 1 	            # How many vertices to remove randomly in the mutate() function
 UNIQUE_ITERATIONS = 100	    # Used by local_improvement() to prevent a stall for very small cliques
 SHUFFLE_TOLERANCE = 10      # Generate a fresh population after a stall
-DEFAULT_TOTAL_ITERATIONS = 600 # number of generations to run the algorithm
+DEFAULT_TOTAL_ITERATIONS = 500 # number of generations to run the algorithm
 
 class Node:
    def __init__(self, value = 0):
@@ -42,7 +49,6 @@ class SortedListNode:
 
 class Graph:
    def __init__(self):
-      # lista Node-ova
       self.nodes = {}
       for i in range(0, NUMBER_NODES+1):
          self.nodes[i] = None
@@ -52,7 +58,7 @@ class Graph:
    def add_edge(self, sv, ev):
       self.aMatrix[sv][ev] = 1
       self.aMatrix[ev][sv] = 1
-
+      
       node = self.nodes[sv]
       if(node == None):
          node = Node(sv)
@@ -63,7 +69,7 @@ class Graph:
       else:
          (Node)(self.nodes[sv]).add_edge(ev)
          (Node)(self.nodes[sv]).degree += 1
-
+         
       node = self.nodes[ev]
       if(node == None):
          node = Node(ev)
@@ -116,7 +122,7 @@ class Clique:
       self.clique = [] # int
       self.pa = [] #int
       self.mapPA = {} #int
-      self.mapClique = {} # int 
+      self.mapClique = {} # int
 
       if firstVertex != None:
          self.clique.append(firstVertex)
@@ -205,7 +211,7 @@ class Clique:
          return True
       return False
       
-   def compute_sorted_list(self) -> list: #vector<SortedListNode>
+   def compute_sorted_list(self) -> List[SortedListNode]:
       sortedList = []
       for i in range(0, len(self.pa)):
          node1 = self.pa[i]
@@ -218,6 +224,7 @@ class Clique:
                reach += 1
          n = SortedListNode(node1, reach)
          sortedList.append(n)
+      sortedList.sort(key= lambda  x: x.reach, reverse=True)
       return sortedList
 
    def clone(self):
@@ -288,11 +295,8 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print()
 
-def generate_random_population(total=None, i=None):
+def generate_random_population():
    
-   if i is not None:
-      printProgressBar(i, total, prefix="Genetic alg")
-
    population = []
    flags = [False] * NUMBER_NODES
 
@@ -509,7 +513,7 @@ def genetski(filepath: str, iterations) -> Clique:
       if prevBest == len(gBest.clique):
          cnt += 1
          if cnt > SHUFFLE_TOLERANCE:
-            population = generate_random_population(iters, i)
+            population = generate_random_population()
             random.seed(datetime.now().microsecond)
             cnt = 0
       else:
@@ -536,6 +540,7 @@ def genetski(filepath: str, iterations) -> Clique:
          newPopulation.append(offspring)
 
       population = newPopulation
+
    filename = filepath.split(os.sep)[-1][:-4]+"_total_iters_"+str(iterations)+".png"
    pic_filepath = os.path.join(os.getcwd(), graph_pics_dir, filename)
    graph.visualize(gBest.clique, pic_filepath, filename)

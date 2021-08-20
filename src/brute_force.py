@@ -69,9 +69,20 @@ def brute_force_clique(G:dict):
 
 if __name__ == '__main__':
     print("Loading graph from :", graph_1)
-    G = process_data(graph_1)
+    # G = process_data(graph_1)
     print("Brute force algorithm...", datetime.now())
-    brute_force_clique(G)
+    # brute_force_clique(G)
+    # D = {
+    #     'a' : ['b', 'c', 'd'],
+    #     'b' : ['c', 'e', 'd', 'a'],
+    #     'c' : ['a', 'b', 'd'],
+    #     'g' : ['d','i'],
+    #     'i' : ['j', 'g', 'd'],
+    #     'd' : ['c', 'e','f', 'b','g','i'],
+    #     'j' : ['i']
+    # }
+    D = {0: [1, 2, 3, 4, 5, 7, 9], 9: [0, 2, 3, 4, 5, 6, 7, 9], 1: [0, 1, 2, 3, 5, 6, 7, 8], 7: [0, 1, 2, 3, 5, 6, 7, 9], 8: [1, 3, 4, 5, 6], 3: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2: [0, 1, 3, 5, 7, 9], 5: [0, 1, 2, 3, 5, 6, 7, 8, 9], 4: [0, 8, 3, 9], 6: [1, 3, 5, 6, 7, 8, 9]}
+    brute_force_clique(D)
     
     print(datetime.now(),"Maximum clique",str(max), "with nodes:\n", clique_nodes)
                         

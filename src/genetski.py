@@ -500,7 +500,6 @@ def mutate(clique: Clique):
 def genetski(filepath: str, iterations) -> Clique:
 
    start = time.time()
-
    process_data(filepath)
    iters = int(iterations)
 
@@ -513,7 +512,10 @@ def genetski(filepath: str, iterations) -> Clique:
    prevBest = len(gBest.clique)
    cnt = 0
    for i in range(0, iters):
-      printProgressBar(i, iterations, "Generations")
+      # printProgressBar(i, iterations, "Generations")
+      filledLength = int(50 * i // iterations)
+      bar = "*" * filledLength + '-' * (50 - filledLength)
+      print(f'\rGenerations |{bar}| {100 * (i / float(iterations))}% \r', end = '\r')
       if prevBest == len(gBest.clique):
          cnt += 1
          if cnt > SHUFFLE_TOLERANCE:
@@ -544,7 +546,8 @@ def genetski(filepath: str, iterations) -> Clique:
          newPopulation.append(offspring)
 
       population = newPopulation
-
+      
+   print()
    filename = filepath.split(os.sep)[-1][:-4]+"_total_iters_"+str(iterations)+".png"
    pic_filepath = os.path.join(os.getcwd(), graph_pics_dir, filename)
 
@@ -584,6 +587,5 @@ if __name__ == '__main__':
          exit(0)
 
       iterations = int(sys.argv[2])
-
       gBest = genetski(sys.argv[1], iterations)
 

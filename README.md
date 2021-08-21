@@ -1,6 +1,7 @@
 # Kurs: Računarska inteligencija
 
 ## Problem maksimalne klike (Maximum clique)
+Pokretanje se radi iz src foldera.
 ### Brute-force algortitam
 Sa odsecanjem
 ```

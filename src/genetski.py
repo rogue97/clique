@@ -513,6 +513,7 @@ def genetski(filepath: str, iterations) -> Clique:
    prevBest = len(gBest.clique)
    cnt = 0
    for i in range(0, iters):
+      printProgressBar(i, iterations, "Generations")
       if prevBest == len(gBest.clique):
          cnt += 1
          if cnt > SHUFFLE_TOLERANCE:
